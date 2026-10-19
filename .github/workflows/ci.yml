@@ -1,0 +1,63 @@
+name: ci
+
+on:
+  push:
+    branches: [main, master]
+    paths: ["go-interview/**", ".github/workflows/ci.yml"]
+  pull_request:
+    paths: ["go-interview/**", ".github/workflows/ci.yml"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: go-interview
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go-interview/go.mod
+          cache-dependency-path: go-interview/go.mod
+
+      - name: gofmt
+        run: |
+          unformatted=$(gofmt -l .)
+          if [ -n "$unformatted" ]; then
+            echo "Files need gofmt:"; echo "$unformatted"; exit 1
+          fi
+
+      - name: go vet
+        run: go vet ./...
+
+      - name: go test
+        run: go test -race -count=1 -coverprofile=coverage.out ./...
+
+      - name: go build
+        run: go build ./...
+
+  image:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: docker build
+        run: docker build -t go-interview:${{ github.sha }} go-interview
+
+      - name: smoke test /health
+        run: |
+          docker run -d --name app -p 8080:8080 go-interview:${{ github.sha }}
+          for i in $(seq 1 10); do
+            curl -fsS localhost:8080/health && exit 0
+            sleep 1
+          done
+          docker logs app; exit 1

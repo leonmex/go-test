@@ -1,0 +1,7 @@
+.git
+.air.toml
+tmp/
+build-errors.log
+*.md
+Dockerfile
+.dockerignore
