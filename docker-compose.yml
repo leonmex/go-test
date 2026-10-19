@@ -1,0 +1,56 @@
+services:
+  go-api-images:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: go-api-images
+    working_dir: /app
+    volumes:
+      - ./go-api-images:/app
+      - go-mod-cache:/go/pkg/mod
+      - go-build-cache:/root/.cache/go-build
+    ports:
+      - "${GO_API_IMAGES_PORT:-8080}:8080"
+    environment:
+      - PORT=8080
+      - ENV=development
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+
+  go-interview:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: go-interview
+    working_dir: /app
+    volumes:
+      - ./go-interview:/app
+      - go-mod-cache:/go/pkg/mod
+      - go-build-cache:/root/.cache/go-build
+    ports:
+      - "${GO_INTERVIEW_PORT:-8081}:8080"
+    environment:
+      - ADDR=:8080
+      - ENV=development
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+
+volumes:
+  go-mod-cache:
+    name: go-interview-mod-cache
+  go-build-cache:
+    name: go-interview-build-cache

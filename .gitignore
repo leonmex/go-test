@@ -1,0 +1,10 @@
+# Local environment overrides
+.env.local
+
+# Air temporary build outputs (if built locally)
+tmp/
+build-errors.log
+
+# IDE files
+.vscode/
+.idea/

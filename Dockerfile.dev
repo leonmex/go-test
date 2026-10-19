@@ -1,0 +1,22 @@
+# Latest stable Go development environment
+FROM golang:1.24-bookworm
+
+# Install dev tools and utilities
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    git \
+    make \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Air for live hot-reload (pinned to v1.61.7 for Go 1.24 compatibility and deterministic builds)
+RUN go install github.com/air-verse/air@v1.61.7
+
+WORKDIR /app
+
+# Ensure shared compilation cache and tmp directories exist with open permissions
+RUN mkdir -p /tmp/air && chmod -R 777 /tmp/air
+
+EXPOSE 8080
+
+CMD ["air"]
