@@ -49,6 +49,28 @@ services:
     tty: true
     restart: unless-stopped
 
+  # Usage: docker compose run --rm -w /infra/bootstrap terraform init
+  terraform:
+    image: hashicorp/terraform:1.16.6
+    profiles: ["tools"]
+    working_dir: /infra
+    volumes:
+      - ./infra:/infra
+    env_file:
+      - path: ./infra/.aws.env
+        required: false
+    environment:
+      - AWS_REGION=eu-north-1
+
+  aws:
+    image: amazon/aws-cli:2.38.1
+    profiles: ["tools"]
+    env_file:
+      - path: ./infra/.aws.env
+        required: false
+    environment:
+      - AWS_REGION=eu-north-1
+
 volumes:
   go-mod-cache:
     name: go-interview-mod-cache

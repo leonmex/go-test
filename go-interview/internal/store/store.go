@@ -46,6 +46,13 @@ func (m *Memory) Get(ctx context.Context, id string) (Item, error) {
 	if !ok {
 		return Item{}, ErrNotFound
 	}
+
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+	}()
 	return it, nil
 }
 
