@@ -1,5 +1,5 @@
-// Step 01: Goroutines
-// Problem: No synchronization between goroutines
+// Step 00: Single Waiter - Sequential Processing
+// Problem: One waiter handling all orders sequentially - very slow!
 
 package main
 
@@ -16,10 +16,16 @@ type Order struct {
 func processOrder(order Order) {
 	// Simulate cooking time
 	fmt.Printf("Preparing order for table %d...\n", order.TableNumber)
-	
+
 	time.Sleep(order.PrepTime)
-	
+
 	fmt.Printf("Order ready for table %d!\n\n", order.TableNumber)
+}
+
+func processAll(orders []Order) {
+	for _, order := range orders {
+		processOrder(order)
+	}
 }
 
 func main() {
@@ -31,9 +37,5 @@ func main() {
 		{TableNumber: 5, PrepTime: 4 * time.Second},
 	}
 
-	for _, order := range orders {
-		go processOrder(order)
-	}
-
-	fmt.Scanln()
+	processAll(orders)
 }

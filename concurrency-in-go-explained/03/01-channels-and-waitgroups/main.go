@@ -10,38 +10,45 @@ import (
 )
 
 func sendMessage(ch chan<- string, num int, wg *sync.WaitGroup) {
+	defer wg.Done()
 	fmt.Printf("Sending message %d\n", num)
 
 	time.Sleep(time.Second * time.Duration(num)) // Simulate some work
 	ch <- fmt.Sprintf("✅ Message %d sent!", num)
-	wg.Done()
 }
 
-func receiveMessage(msgs <-chan string) {
+func receiveMessage(msgs <-chan string) []string {
 	fmt.Println("Waiting for message")
 
+	var got []string
 	for msg := range msgs {
 		fmt.Println("Received:", msg)
+		got = append(got, msg)
 	}
+	return got
 }
 
-func main() {
+// sendAll starts one sender per num; a closer goroutine closes the channel
+// once every sender is done (wg.Wait), which ends the range in receiveMessage.
+func sendAll(nums ...int) []string {
 	msgs := make(chan string)
 
 	wg := sync.WaitGroup{}
-	wg.Add(2)
-
-	go sendMessage(msgs, 1, &wg)
-	go sendMessage(msgs, 2, &wg)
+	wg.Add(len(nums))
+	for _, n := range nums {
+		go sendMessage(msgs, n, &wg)
+	}
 
 	go func() {
-		receiveMessage(msgs)
+		wg.Wait()
+		close(msgs)
 	}()
 
-	wg.Wait()
-	close(msgs)
+	return receiveMessage(msgs)
+}
+
+func main() {
+	sendAll(1, 2)
 
 	log.Println("Work done")
-
-	fmt.Scanln() // keep the program running
 }

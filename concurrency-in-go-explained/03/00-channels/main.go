@@ -17,14 +17,20 @@ func sendMessage(num int, msgChan chan<- string) {
 	msgChan <- msg
 }
 
-func receiveMessage(msgs <-chan string) {
+func receiveMessage(msgs <-chan string) []string {
 	fmt.Println("Waiting for message")
 
+	var got []string
 	for msg := range msgs {
 		fmt.Println("Received:", msg)
+		got = append(got, msg)
 	}
+	return got
 }
 
+// Known problem (fixed in 01-channels-and-waitgroups): nobody closes msgChan before
+// receiveMessage ranges over it, so after the 2 messages the program dies with
+// "fatal error: all goroutines are asleep - deadlock!".
 func main() {
 	msgChan := make(chan string)
 

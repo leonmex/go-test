@@ -25,6 +25,25 @@ func processOrder(waiterID int, order Order) string {
 	return "order has been done"
 }
 
+// processAll runs every order concurrently and waits for all of them.
+// Each goroutine writes only its own index, so the slice needs no mutex.
+func processAll(orders []Order) []string {
+	results := make([]string, len(orders))
+	wg := sync.WaitGroup{}
+
+	for waiterID, order := range orders {
+		wg.Add(1)
+
+		go func() {
+			defer wg.Done()
+			results[waiterID] = processOrder(waiterID, order)
+		}()
+	}
+
+	wg.Wait()
+	return results
+}
+
 func main() {
 	orders := []Order{
 		{TableNumber: 1, PrepTime: 2 * time.Second},
@@ -34,18 +53,7 @@ func main() {
 		{TableNumber: 5, PrepTime: 4 * time.Second},
 	}
 
-	wg := sync.WaitGroup{}
-
-	for waiterID, order := range orders {
-		wg.Add(1)
-
-		go func() {
-			defer wg.Done()
-			processOrder(waiterID, order)
-		}()
-	}
-
-	wg.Wait()
+	processAll(orders)
 
 	fmt.Println("all orders done")
 }
