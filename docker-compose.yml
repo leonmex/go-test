@@ -1,25 +1,50 @@
 services:
-  go-api-images:
+  # go-api-images:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.dev
+  #   container_name: go-api-images
+  #   working_dir: /app
+  #   volumes:
+  #     - ./go-api-images:/app
+  #     - go-mod-cache:/go/pkg/mod
+  #     - go-build-cache:/root/.cache/go-build
+  #   ports:
+  #     - "${GO_API_IMAGES_PORT:-8080}:8080"
+  #   environment:
+  #     - PORT=8080
+  #     - ENV=development
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+  #     interval: 10s
+  #     timeout: 3s
+  #     retries: 3
+  #     start_period: 5s
+  #   stdin_open: true
+  #   tty: true
+  #   restart: unless-stopped
+
+  go-api-services:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    container_name: go-api-images
+    container_name: go-api-services
     working_dir: /app
     volumes:
-      - ./go-api-images:/app
-      - go-mod-cache:/go/pkg/mod
-      - go-build-cache:/root/.cache/go-build
+      - ./go-services:/app
+      # - go-mod-cache:/go/pkg/mod
+      # - go-build-cache:/root/.cache/go-build
     ports:
       - "${GO_API_IMAGES_PORT:-8080}:8080"
     environment:
       - PORT=8080
       - ENV=development
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
-      interval: 10s
-      timeout: 3s
-      retries: 3
-      start_period: 5s
+    # healthcheck:
+    #   test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+    #   interval: 10s
+    #   timeout: 3s
+    #   retries: 3
+    #   start_period: 5s
     stdin_open: true
     tty: true
     restart: unless-stopped
@@ -40,7 +65,7 @@ services:
       - ADDR=:8080
       - ENV=development
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      test: [ "CMD-SHELL", "curl -f http://localhost:8080/health || exit 1" ]
       interval: 10s
       timeout: 3s
       retries: 3
